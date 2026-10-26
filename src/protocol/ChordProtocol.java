@@ -87,6 +87,9 @@ public class ChordProtocol implements Protocol{
      */
     public void buildOverlayNetwork(){
 
+        // if the method runs multiple times we start with a cleared ring
+        this.ring.clear();
+
         // get all the nodes from the network into a local copy "nodes"
         LinkedHashMap<String, NodeInterface> nodes = network.getTopology();
 
@@ -98,6 +101,13 @@ public class ChordProtocol implements Protocol{
 
             int nodeId = ch.hash(nodeName);
 
+            if(ring.containsKey(nodeId)){
+                throw new IllegalStateException(
+                    "Hash Collision for node ID: " + nodeId
+                );
+            }
+
+            node.setId(nodeId);
             ring.put(nodeId, node);
         }
 
@@ -138,9 +148,34 @@ public class ChordProtocol implements Protocol{
      *     3) node - first node in the ring that is responsible for indexes in the interval
      */
     public void buildFingerTable() {
-        /*
-        implement this logic
-         */
+        
+        // iterate thru each node in the ring
+        for(Map.Entry<Integer, NodeInterface> entry : this.ring.entrySet()){
+
+            int nodeId = entry.getKey();
+            NodeInterface node = entry.getValue();
+            TreeMap<Integer, Integer> fingerTable = new TreeMap<>();
+
+            // give the ith node m fingers
+            for(int i = 1; i <= m; i++){
+
+                int start = (nodeId + (1 << (i - 1))) % (1 << m);
+
+                // get the succesor node closest to start
+                Map.Entry<Integer, NodeInterface> finger = this.ring.ceilingEntry(start);
+
+                // if the there are no more nodes, make first node the finger
+                if (finger == null) {
+                    finger = this.ring.firstEntry();
+                }
+
+                // add finger to the fingertable
+                fingerTable.put(start, finger.getKey());
+            }
+
+            node.setRoutingTable(fingerTable);
+
+        }
 
     }
 
