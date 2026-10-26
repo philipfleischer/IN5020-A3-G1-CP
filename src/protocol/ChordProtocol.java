@@ -134,8 +134,6 @@ public class ChordProtocol implements Protocol{
 
 
 
-
-
     /**
      * This method builds the finger table. The finger table is the routing table used in the chord protocol to perform
      * lookup operations. The finger table stores m-entries. Each ith entry points to the ith finger of the node.
@@ -147,6 +145,20 @@ public class ChordProtocol implements Protocol{
      *     2) interval - [finger[i].start, finger[i+1].start)
      *     3) node - first node in the ring that is responsible for indexes in the interval
      */
+
+    // small helper class to store a finger in a fingertable consisting of start, interval and the nodeId
+    public class FingerTableEntry {
+        int start;
+        int intervalEnd;
+        int nodeId;
+
+        public FingerTableEntry(int start, int intervalEnd, int nodeId) {
+            this.start = start;
+            this.intervalEnd = intervalEnd;
+            this.nodeId = nodeId;
+        }
+    }
+
     public void buildFingerTable() {
         
         // iterate thru each node in the ring
@@ -154,12 +166,14 @@ public class ChordProtocol implements Protocol{
 
             int nodeId = entry.getKey();
             NodeInterface node = entry.getValue();
-            TreeMap<Integer, Integer> fingerTable = new TreeMap<>();
+            TreeMap<Integer, FingerTableEntry> fingerTable = new TreeMap<>();
 
             // give the ith node m fingers
             for(int i = 1; i <= m; i++){
 
                 int start = (nodeId + (1 << (i - 1))) % (1 << m);
+
+                int intervalEnd = (nodeId + (1 << i)) % (1 << m);
 
                 // get the succesor node closest to start
                 Map.Entry<Integer, NodeInterface> finger = this.ring.ceilingEntry(start);
@@ -169,8 +183,10 @@ public class ChordProtocol implements Protocol{
                     finger = this.ring.firstEntry();
                 }
 
+                FingerTableEntry fingerTableEntry = new FingerTableEntry(start, intervalEnd, finger.getKey());
+
                 // add finger to the fingertable
-                fingerTable.put(start, finger.getKey());
+                fingerTable.put(i, fingerTableEntry);
             }
 
             node.setRoutingTable(fingerTable);
