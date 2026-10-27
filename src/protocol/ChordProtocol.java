@@ -222,6 +222,7 @@ public class ChordProtocol implements Protocol{
         return true; // start and end same node
     }
 
+    // helper function to check if keyindex is between currentId and fingerId
     private boolean inOpenInterval(int fingerId, int currentId, int keyIndex) {
 
         if (currentId < keyIndex) {
@@ -237,7 +238,7 @@ public class ChordProtocol implements Protocol{
 
     public LookUpResponse lookUp(int keyIndex){
 
-        // start point
+        // start point (first node), can be any node
         NodeInterface currentNode = ring.firstEntry().getValue();
         LookUpResponse lookUpResponse = new LookUpResponse(new LinkedHashSet<String>(), keyIndex, null);
 
@@ -259,7 +260,7 @@ public class ChordProtocol implements Protocol{
             // Case 2: Successor is responsible
             if (inInterval(keyIndex, currentNodeId, successor.getId())) {
                 lookUpResponse.peers_looked_up.add(successor.getName());
-                
+
                 lookUpResponse.node_index = successor.getId();
                 lookUpResponse.node_name = successor.getName();
                 return lookUpResponse;
