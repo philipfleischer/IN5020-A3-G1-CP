@@ -239,15 +239,30 @@ public class ChordProtocol implements Protocol{
 
         // start point
         NodeInterface currentNode = ring.firstEntry().getValue();
+        LookUpResponse lookUpResponse = new LookUpResponse(new LinkedHashSet<String>(), keyIndex, null);
 
         while (true){
 
             NodeInterface successor = currentNode.getSuccessor();
             int currentNodeId = currentNode.getId();
 
-            // check if the keyindex is between the nodeId and succesorId
-            if(inInterval(keyIndex, currentNodeId, successor.getId())){
-                // found the responsible node
+            // Register the node we are checking
+            lookUpResponse.peers_looked_up.add(currentNode.getName());
+
+            // Case 1: Current node is responsible
+            if (currentNodeId == keyIndex) {
+                lookUpResponse.node_index = currentNodeId;
+                lookUpResponse.node_name = currentNode.getName();
+                return lookUpResponse;
+            }
+
+            // Case 2: Successor is responsible
+            if (inInterval(keyIndex, currentNodeId, successor.getId())) {
+                lookUpResponse.peers_looked_up.add(successor.getName());
+                
+                lookUpResponse.node_index = successor.getId();
+                lookUpResponse.node_name = successor.getName();
+                return lookUpResponse;
             }
 
             // check fingertable for the next node jump (needed casting from type Object)
@@ -256,6 +271,7 @@ public class ChordProtocol implements Protocol{
 
             Integer nextNodeId = null;
 
+            // didnt find the responsible node, we have to check fingertable for next hop
             for (Map.Entry<Integer, FingerTableEntry> entry
                     : fingerTable.entrySet()) {
 
@@ -273,7 +289,6 @@ public class ChordProtocol implements Protocol{
             } else {
                 currentNode = currentNode.getSuccessor();
             }
-
         }
     }
 }

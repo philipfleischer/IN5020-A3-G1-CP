@@ -8,6 +8,9 @@ import protocol.ChordProtocol;
 import protocol.LookUpResponse;
 import protocol.Protocol;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -275,6 +278,53 @@ public class ChordProtocolSimulator {
 
     }
 
+    /**
+     * This method tests the functioning of the lookup. This is a simple evaluation. For each key index it calls the
+     * lookup from the chord protocol and returns the node index. It then compares the node index with the correct node
+     * index (check response) is used for the comparison.
+     */
+    public void doLookUpAndGenerateOutputFiles(){
+        int totalHops = 0;
+        int successfulLookups = 0;
+        
+        File outputFolder = new File("output");
+        outputFolder.mkdirs();
+
+        String fileName = ("configuration_" + nodeCount + "_" + m + "_.txt");
+        File outputFile = new File(outputFolder, fileName);
+
+        try (FileWriter myWriter = new FileWriter(outputFile)) {
+
+            for (Map.Entry<String, Integer> entry : keyIndexes.entrySet()) {
+
+                LookUpResponse response = protocol.lookUp(entry.getValue());
+
+                if (response == null) {
+                    return;
+                }
+
+                if (checkResponse(entry.getValue(), response.node_name)) {
+
+                    totalHops += response.peers_looked_up.size();
+                    successfulLookups++;
+
+                    myWriter.write(
+                        entry.getKey() + ":" + entry.getValue() +
+                        response.toString() + "\n"
+                    );
+                }
+            }
+
+            double averageHops = (double) totalHops / successfulLookups;
+            myWriter.write("average hop count: " + averageHops + "\n");
+            myWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     /**
      * This method compares whether the node actually stores the given key index or not
@@ -332,6 +382,7 @@ public class ChordProtocolSimulator {
         implement this logic
          */
         // Look up all the key, print out as required in the Assignment Description
+        doLookUpAndGenerateOutputFiles();
     }
 
 }
