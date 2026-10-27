@@ -5,6 +5,7 @@ import crypto.ConsistentHashing;
 import p2p.NetworkInterface;
 import p2p.NodeInterface;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -206,13 +207,73 @@ public class ChordProtocol implements Protocol{
      * @param keyIndex index of the key
      * @return names of nodes that have been searched and the final node that contains the key
      */
-    public LookUpResponse lookUp(int keyIndex){
-        /*
-        implement this logic
-         */
-        return null;
+
+    // helper function to check if keyindex is between nodeId and successorId
+    private boolean inInterval(int id, int start, int end) {
+
+        if (start < end) {
+            return start < id && id <= end;
+        }
+
+        if (start > end) {
+            return id > start || id <= end;
+        }
+
+        return true; // start and end same node
     }
 
+    private boolean inOpenInterval(int fingerId, int currentId, int keyIndex) {
 
+        if (currentId < keyIndex) {
+            return currentId < fingerId && fingerId < keyIndex;
+        }
 
+        if (currentId > keyIndex) {
+            return fingerId > currentId || fingerId < keyIndex;
+        }
+
+        return false;
+    }
+
+    public LookUpResponse lookUp(int keyIndex){
+
+        // start point
+        NodeInterface currentNode = ring.firstEntry().getValue();
+
+        while (true){
+
+            NodeInterface successor = currentNode.getSuccessor();
+            int currentNodeId = currentNode.getId();
+
+            // check if the keyindex is between the nodeId and succesorId
+            if(inInterval(keyIndex, currentNodeId, successor.getId())){
+                // found the responsible node
+            }
+
+            // check fingertable for the next node jump (needed casting from type Object)
+            @SuppressWarnings("unchecked") // remove the error for unchecked cast
+            TreeMap<Integer, FingerTableEntry> fingerTable = (TreeMap<Integer, FingerTableEntry>) currentNode.getRoutingTable();
+
+            Integer nextNodeId = null;
+
+            for (Map.Entry<Integer, FingerTableEntry> entry
+                    : fingerTable.entrySet()) {
+
+                FingerTableEntry finger = entry.getValue();
+
+                int fingerNodeId = finger.nodeId;
+
+                if (inOpenInterval(fingerNodeId, currentNodeId, keyIndex)) {
+                    nextNodeId = fingerNodeId;
+                }
+            }
+
+            if (nextNodeId != null) {
+                currentNode = ring.get(nextNodeId);
+            } else {
+                currentNode = currentNode.getSuccessor();
+            }
+
+        }
+    }
 }
