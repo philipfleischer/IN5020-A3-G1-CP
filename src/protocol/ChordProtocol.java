@@ -147,34 +147,81 @@ public class ChordProtocol implements Protocol{
      *     3) node - first node in the ring that is responsible for indexes in the interval
      */
 
-    // small helper class to store a finger in a fingertable consisting of start, interval and the nodeId
-    public class FingerTableEntry {
+    // small helper class to store one finger (one row) in a fingertable: row number i, start, interval and the node
+    public static class FingerTableEntry {
+        int i;
         int start;
+        // the interval is [start, intervalEnd], both ends included. It can wrap around 0, e.g. (7,3) with m = 3
         int intervalEnd;
         int nodeId;
+        // we keep the name too, so the table can be printed like in the assignment
+        String nodeName;
 
-        public FingerTableEntry(int start, int intervalEnd, int nodeId) {
+        public FingerTableEntry(int i, int start, int intervalEnd, int nodeId, String nodeName) {
+            this.i = i;
             this.start = start;
             this.intervalEnd = intervalEnd;
             this.nodeId = nodeId;
+            this.nodeName = nodeName;
+        }
+
+        // checks if an id (e.g. a key index) is inside the interval of this row.
+        // The lookup uses this to find "the successor whose interval contains the index of the key".
+        public boolean contains(int id) {
+            if (start <= intervalEnd) {
+                // normal interval, e.g. (3,4): id must be between the two ends
+                return start <= id && id <= intervalEnd;
+            }
+            // wrapped interval, e.g. (7,3): it passes 0, so id is either at the end or at the start of the ring
+            return id >= start || id <= intervalEnd;
+        }
+
+        // prints the row in the same style as the tables in the assignment
+        @Override
+        public String toString() {
+            return "i=" + i + "  start=" + start + "  interval=(" + start + "," + intervalEnd + ")"
+                    + "  successor=" + nodeName + " (index " + nodeId + ")";
+        }
+    }
+
+    // the finger table of one node: row number i -> row. It is still a TreeMap, so the lookup can use it as before.
+    // We only override toString(), because Node.print() calls routingTable.toString() when the network is printed.
+    // Without this, the output only shows object addresses like "ChordProtocol$FingerTableEntry@3941a79c".
+    public static class FingerTable extends TreeMap<Integer, FingerTableEntry> {
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            // one row per line, below the node line
+            for (FingerTableEntry row : values()) {
+                sb.append(System.lineSeparator()).append("    ").append(row);
+            }
+            return sb.toString();
         }
     }
 
     public void buildFingerTable() {
-        
+
+        // 2^m, the number of ids on the ring. All calculations are done mod this number.
+        int ringSize = 1 << m;
+
         // iterate thru each node in the ring
         for(Map.Entry<Integer, NodeInterface> entry : this.ring.entrySet()){
 
             int nodeId = entry.getKey();
             NodeInterface node = entry.getValue();
-            TreeMap<Integer, FingerTableEntry> fingerTable = new TreeMap<>();
+            FingerTable fingerTable = new FingerTable();
 
-            // give the ith node m fingers
+            // give the node m fingers, i = 1..m
             for(int i = 1; i <= m; i++){
 
-                int start = (nodeId + (1 << (i - 1))) % (1 << m);
+                // start = (n + 2^(i-1)) mod 2^m
+                int start = (nodeId + (1 << (i - 1))) % ringSize;
 
-                int intervalEnd = (nodeId + (1 << i)) % (1 << m);
+                // the interval ends one before the start of the next row: (n + 2^i) - 1.
+                // For the last row the "next row" is the first row, whose start is n + 1, so the interval ends at n.
+                // This way the m intervals together cover the whole ring exactly once (e.g. Node 3: (4,4) (5,6) (7,3)).
+                int nextStart = (i < m) ? (nodeId + (1 << i)) % ringSize : (nodeId + 1) % ringSize;
+                int intervalEnd = (nextStart - 1 + ringSize) % ringSize;
 
                 // get the succesor node closest to start
                 Map.Entry<Integer, NodeInterface> finger = this.ring.ceilingEntry(start);
@@ -184,7 +231,8 @@ public class ChordProtocol implements Protocol{
                     finger = this.ring.firstEntry();
                 }
 
-                FingerTableEntry fingerTableEntry = new FingerTableEntry(start, intervalEnd, finger.getKey());
+                FingerTableEntry fingerTableEntry = new FingerTableEntry(
+                        i, start, intervalEnd, finger.getKey(), finger.getValue().getName());
 
                 // add finger to the fingertable
                 fingerTable.put(i, fingerTableEntry);
@@ -208,88 +256,60 @@ public class ChordProtocol implements Protocol{
      * @return names of nodes that have been searched and the final node that contains the key
      */
 
-    // helper function to check if keyindex is between nodeId and successorId
-    private boolean inInterval(int id, int start, int end) {
-
-        if (start < end) {
-            return start < id && id <= end;
-        }
-
-        if (start > end) {
-            return id > start || id <= end;
-        }
-
-        return true; // start and end same node
+    // helper function to check if a node really stores the key. The simulator has already put every key index in the
+    // data of the node that is responsible for it, so we just look there.
+    private boolean storesKey(NodeInterface node, int keyIndex) {
+        Object data = node.getData();
+        // getData() returns an Object, but the simulator stores the key indexes in a collection of Integers
+        return (data instanceof Collection) && ((Collection<?>) data).contains(keyIndex);
     }
 
-    // helper function to check if keyindex is between currentId and fingerId
-    private boolean inOpenInterval(int fingerId, int currentId, int keyIndex) {
-
-        if (currentId < keyIndex) {
-            return currentId < fingerId && fingerId < keyIndex;
-        }
-
-        if (currentId > keyIndex) {
-            return fingerId > currentId || fingerId < keyIndex;
-        }
-
-        return false;
-    }
-
+    // The lookup, as described in the assignment:
+    //   1) start at the same node for every key
+    //   2) the current node has now seen the lookup, so it is added to the route (this is one hop)
+    //   3) if the current node stores the key, we are done
+    //   4) if not, find the row in its finger table whose interval contains the key index, and go to that row's node
+    // Example from the assignment (start at Node 4, key 1 with index 4):
+    //   Node 4 -> row (3,4) -> Node 3 -> row (4,4) -> Node 1 stores the key. hop count = 3
     public LookUpResponse lookUp(int keyIndex){
 
-        // start point (first node), can be any node
+        // start point (the node with the smallest index). Any node is allowed, but it must be the same for every key
         NodeInterface currentNode = ring.firstEntry().getValue();
         LookUpResponse lookUpResponse = new LookUpResponse(new LinkedHashSet<String>(), keyIndex, null);
 
         while (true){
 
-            NodeInterface successor = currentNode.getSuccessor();
-            int currentNodeId = currentNode.getId();
-
-            // Register the node we are checking
+            // Register the node we are checking. A LinkedHashSet keeps the order, so this is the route
             lookUpResponse.peers_looked_up.add(currentNode.getName());
 
-            // Case 1: Current node is responsible
-            if (currentNodeId == keyIndex) {
-                lookUpResponse.node_index = currentNodeId;
+            // the current node stores the key -> return its information
+            if (storesKey(currentNode, keyIndex)) {
+                lookUpResponse.node_index = currentNode.getId();
                 lookUpResponse.node_name = currentNode.getName();
                 return lookUpResponse;
             }
 
-            // Case 2: Successor is responsible
-            if (inInterval(keyIndex, currentNodeId, successor.getId())) {
-                lookUpResponse.peers_looked_up.add(successor.getName());
-
-                lookUpResponse.node_index = successor.getId();
-                lookUpResponse.node_name = successor.getName();
-                return lookUpResponse;
-            }
-
             // check fingertable for the next node jump (needed casting from type Object)
-            @SuppressWarnings("unchecked") // remove the error for unchecked cast
-            TreeMap<Integer, FingerTableEntry> fingerTable = (TreeMap<Integer, FingerTableEntry>) currentNode.getRoutingTable();
+            FingerTable fingerTable = (FingerTable) currentNode.getRoutingTable();
 
-            Integer nextNodeId = null;
-
-            // didnt find the responsible node, we have to check fingertable for next hop
-            for (Map.Entry<Integer, FingerTableEntry> entry
-                    : fingerTable.entrySet()) {
-
-                FingerTableEntry finger = entry.getValue();
-
-                int fingerNodeId = finger.nodeId;
-
-                if (inOpenInterval(fingerNodeId, currentNodeId, keyIndex)) {
-                    nextNodeId = fingerNodeId;
+            // the next node is the successor of the row whose interval contains the key index.
+            // The m intervals cover the whole ring, so exactly one row matches.
+            NodeInterface nextNode = null;
+            for (FingerTableEntry finger : fingerTable.values()) {
+                if (finger.contains(keyIndex)) {
+                    nextNode = ring.get(finger.nodeId);
+                    break;
                 }
             }
 
-            if (nextNodeId != null) {
-                currentNode = ring.get(nextNodeId);
-            } else {
-                currentNode = currentNode.getSuccessor();
+            // safety net: in a correct ring this never happens, but if it did we would loop forever.
+            // So we stop with a clear error message instead.
+            if (nextNode == null || lookUpResponse.peers_looked_up.contains(nextNode.getName())) {
+                throw new IllegalStateException("Lookup of key index " + keyIndex + " is stuck at "
+                        + currentNode.getName() + ", route so far: " + lookUpResponse.peers_looked_up);
             }
+
+            currentNode = nextNode;
         }
     }
 }

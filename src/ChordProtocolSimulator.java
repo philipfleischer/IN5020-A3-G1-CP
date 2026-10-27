@@ -303,19 +303,23 @@ public class ChordProtocolSimulator {
                     return;
                 }
 
+                // every lookup is written to the file and counted in the average, also the wrong ones
+                totalHops += response.peers_looked_up.size();
+                myWriter.write(
+                    entry.getKey() + ":" + entry.getValue() +
+                    response.toString() + "\n"
+                );
+
+                // a wrong lookup is not hidden: we mark it with an error line below it
                 if (checkResponse(entry.getValue(), response.node_name)) {
-
-                    totalHops += response.peers_looked_up.size();
                     successfulLookups++;
-
-                    myWriter.write(
-                        entry.getKey() + ":" + entry.getValue() +
-                        response.toString() + "\n"
-                    );
+                } else {
+                    myWriter.write("  -> ERROR: " + response.node_name + " does not store " + entry.getKey() + "\n");
                 }
             }
 
-            double averageHops = (double) totalHops / successfulLookups;
+            // average over all keys. With 0 keys there is nothing to divide, so the average is 0
+            double averageHops = keyIndexes.isEmpty() ? 0.0 : (double) totalHops / keyIndexes.size();
             myWriter.write("average hop count: " + averageHops + "\n");
             myWriter.close();
 
