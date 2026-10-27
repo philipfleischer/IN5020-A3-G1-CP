@@ -334,6 +334,7 @@ public class ChordProtocolSimulator {
      * @return true if the node stores the key index otherwise return false
      */
     public boolean checkResponse(int keyIndex, String peerName){
+        @SuppressWarnings("unchecked")
         LinkedHashSet<Integer> dataItems = (LinkedHashSet<Integer>) this.network.getNode(peerName).getData();
         for(Integer data : dataItems){
             if(data==keyIndex){
