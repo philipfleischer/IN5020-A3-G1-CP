@@ -1,5 +1,3 @@
-
-
 import p2p.Network;
 import p2p.NetworkInterface;
 import p2p.NodeInterface;
@@ -11,6 +9,7 @@ import protocol.Protocol;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 
 /**
@@ -320,8 +319,7 @@ public class ChordProtocolSimulator {
 
             // average over all keys. With 0 keys there is nothing to divide, so the average is 0
             double averageHops = keyIndexes.isEmpty() ? 0.0 : (double) totalHops / keyIndexes.size();
-            myWriter.write("average hop count: " + averageHops + "\n");
-            myWriter.close();
+            myWriter.write("average hop count = " + averageHops + "\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -377,17 +375,36 @@ public class ChordProtocolSimulator {
         // builds the protocol
         buildProtocol();
 
-        printRing();
-        printNetwork();
+        // the ring and the network (all nodes with finger tables and data) are printed by existing methods that use
+        // System.out. The assignment wants all printing in files, so we send that output to a file for this run.
+        printNetworkToFile();
 
-        // tests the lookup operation
-        //testLookUp();
-
-        /*
-        implement this logic
-         */
-        // Look up all the key, print out as required in the Assignment Description
+        // Look up all the keys, write the result of each lookup and the average hop count to the output file
         doLookUpAndGenerateOutputFiles();
     }
 
-}
+    /**
+     * Writes the ring and the full network topology (node indexes, neighbors, finger tables, stored keys) to
+     * output/network_<node count>_<m>_.txt instead of the console. System.out is replaced only while printing
+     * and is always restored afterwards.
+     */
+    public void printNetworkToFile(){
+
+        File outputFolder = new File("output");
+        outputFolder.mkdirs();
+        File networkFile = new File(outputFolder, "network_" + nodeCount + "_" + m + "_.txt");
+
+        PrintStream console = System.out;
+        try (PrintStream filePrinter = new PrintStream(networkFile)) {
+            System.setOut(filePrinter);
+            printRing();
+            printNetwork();
+            filePrinter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            System.setOut(console);
+        }
+    }
+
+} 

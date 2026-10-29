@@ -1,0 +1,125 @@
+........printing ring..............
+Node 1 --- Node 7 --- Node 8 --- Node 6 --- Node 5 --- Node 9 --- Node 4 --- Node 10 --- Node 3 --- Node 2 --- Node 1
+.....................................
+..............Printing network topology..............
+Node : Node 1	Index: 333	Neighbors: Node 7		
+    i=1  start=334  interval=(334,334)  successor=Node 7 (index 480)
+    i=2  start=335  interval=(335,336)  successor=Node 7 (index 480)
+    i=3  start=337  interval=(337,340)  successor=Node 7 (index 480)
+    i=4  start=341  interval=(341,348)  successor=Node 7 (index 480)
+    i=5  start=349  interval=(349,364)  successor=Node 7 (index 480)
+    i=6  start=365  interval=(365,396)  successor=Node 7 (index 480)
+    i=7  start=397  interval=(397,460)  successor=Node 7 (index 480)
+    i=8  start=461  interval=(461,588)  successor=Node 7 (index 480)
+    i=9  start=589  interval=(589,844)  successor=Node 8 (index 601)
+    i=10  start=845  interval=(845,333)  successor=Node 5 (index 865)
+Data : []
+Node : Node 2	Index: 266	Neighbors: Node 1		
+    i=1  start=267  interval=(267,267)  successor=Node 1 (index 333)
+    i=2  start=268  interval=(268,269)  successor=Node 1 (index 333)
+    i=3  start=270  interval=(270,273)  successor=Node 1 (index 333)
+    i=4  start=274  interval=(274,281)  successor=Node 1 (index 333)
+    i=5  start=282  interval=(282,297)  successor=Node 1 (index 333)
+    i=6  start=298  interval=(298,329)  successor=Node 1 (index 333)
+    i=7  start=330  interval=(330,393)  successor=Node 1 (index 333)
+    i=8  start=394  interval=(394,521)  successor=Node 7 (index 480)
+    i=9  start=522  interval=(522,777)  successor=Node 8 (index 601)
+    i=10  start=778  interval=(778,266)  successor=Node 5 (index 865)
+Data : [144]
+Node : Node 3	Index: 139	Neighbors: Node 2		
+    i=1  start=140  interval=(140,140)  successor=Node 2 (index 266)
+    i=2  start=141  interval=(141,142)  successor=Node 2 (index 266)
+    i=3  start=143  interval=(143,146)  successor=Node 2 (index 266)
+    i=4  start=147  interval=(147,154)  successor=Node 2 (index 266)
+    i=5  start=155  interval=(155,170)  successor=Node 2 (index 266)
+    i=6  start=171  interval=(171,202)  successor=Node 2 (index 266)
+    i=7  start=203  interval=(203,266)  successor=Node 2 (index 266)
+    i=8  start=267  interval=(267,394)  successor=Node 1 (index 333)
+    i=9  start=395  interval=(395,650)  successor=Node 7 (index 480)
+    i=10  start=651  interval=(651,139)  successor=Node 6 (index 666)
+Data : []
+Node : Node 4	Index: 105	Neighbors: Node 10		
+    i=1  start=106  interval=(106,106)  successor=Node 10 (index 131)
+    i=2  start=107  interval=(107,108)  successor=Node 10 (index 131)
+    i=3  start=109  interval=(109,112)  successor=Node 10 (index 131)
+    i=4  start=113  interval=(113,120)  successor=Node 10 (index 131)
+    i=5  start=121  interval=(121,136)  successor=Node 10 (index 131)
+    i=6  start=137  interval=(137,168)  successor=Node 3 (index 139)
+    i=7  start=169  interval=(169,232)  successor=Node 2 (index 266)
+    i=8  start=233  interval=(233,360)  successor=Node 2 (index 266)
+    i=9  start=361  interval=(361,616)  successor=Node 7 (index 480)
+    i=10  start=617  interval=(617,105)  successor=Node 6 (index 666)
+Data : []
+Node : Node 5	Index: 865	Neighbors: Node 9		
+    i=1  start=866  interval=(866,866)  successor=Node 9 (index 1006)
+    i=2  start=867  interval=(867,868)  successor=Node 9 (index 1006)
+    i=3  start=869  interval=(869,872)  successor=Node 9 (index 1006)
+    i=4  start=873  interval=(873,880)  successor=Node 9 (index 1006)
+    i=5  start=881  interval=(881,896)  successor=Node 9 (index 1006)
+    i=6  start=897  interval=(897,928)  successor=Node 9 (index 1006)
+    i=7  start=929  interval=(929,992)  successor=Node 9 (index 1006)
+    i=8  start=993  interval=(993,96)  successor=Node 9 (index 1006)
+    i=9  start=97  interval=(97,352)  successor=Node 4 (index 105)
+    i=10  start=353  interval=(353,865)  successor=Node 7 (index 480)
+Data : [669]
+Node : Node 6	Index: 666	Neighbors: Node 5		
+    i=1  start=667  interval=(667,667)  successor=Node 5 (index 865)
+    i=2  start=668  interval=(668,669)  successor=Node 5 (index 865)
+    i=3  start=670  interval=(670,673)  successor=Node 5 (index 865)
+    i=4  start=674  interval=(674,681)  successor=Node 5 (index 865)
+    i=5  start=682  interval=(682,697)  successor=Node 5 (index 865)
+    i=6  start=698  interval=(698,729)  successor=Node 5 (index 865)
+    i=7  start=730  interval=(730,793)  successor=Node 5 (index 865)
+    i=8  start=794  interval=(794,921)  successor=Node 5 (index 865)
+    i=9  start=922  interval=(922,153)  successor=Node 9 (index 1006)
+    i=10  start=154  interval=(154,666)  successor=Node 2 (index 266)
+Data : []
+Node : Node 7	Index: 480	Neighbors: Node 8		
+    i=1  start=481  interval=(481,481)  successor=Node 8 (index 601)
+    i=2  start=482  interval=(482,483)  successor=Node 8 (index 601)
+    i=3  start=484  interval=(484,487)  successor=Node 8 (index 601)
+    i=4  start=488  interval=(488,495)  successor=Node 8 (index 601)
+    i=5  start=496  interval=(496,511)  successor=Node 8 (index 601)
+    i=6  start=512  interval=(512,543)  successor=Node 8 (index 601)
+    i=7  start=544  interval=(544,607)  successor=Node 8 (index 601)
+    i=8  start=608  interval=(608,735)  successor=Node 6 (index 666)
+    i=9  start=736  interval=(736,991)  successor=Node 5 (index 865)
+    i=10  start=992  interval=(992,480)  successor=Node 9 (index 1006)
+Data : [382]
+Node : Node 8	Index: 601	Neighbors: Node 6		
+    i=1  start=602  interval=(602,602)  successor=Node 6 (index 666)
+    i=2  start=603  interval=(603,604)  successor=Node 6 (index 666)
+    i=3  start=605  interval=(605,608)  successor=Node 6 (index 666)
+    i=4  start=609  interval=(609,616)  successor=Node 6 (index 666)
+    i=5  start=617  interval=(617,632)  successor=Node 6 (index 666)
+    i=6  start=633  interval=(633,664)  successor=Node 6 (index 666)
+    i=7  start=665  interval=(665,728)  successor=Node 6 (index 666)
+    i=8  start=729  interval=(729,856)  successor=Node 5 (index 865)
+    i=9  start=857  interval=(857,88)  successor=Node 5 (index 865)
+    i=10  start=89  interval=(89,601)  successor=Node 4 (index 105)
+Data : [489]
+Node : Node 9	Index: 1006	Neighbors: Node 4		
+    i=1  start=1007  interval=(1007,1007)  successor=Node 4 (index 105)
+    i=2  start=1008  interval=(1008,1009)  successor=Node 4 (index 105)
+    i=3  start=1010  interval=(1010,1013)  successor=Node 4 (index 105)
+    i=4  start=1014  interval=(1014,1021)  successor=Node 4 (index 105)
+    i=5  start=1022  interval=(1022,13)  successor=Node 4 (index 105)
+    i=6  start=14  interval=(14,45)  successor=Node 4 (index 105)
+    i=7  start=46  interval=(46,109)  successor=Node 4 (index 105)
+    i=8  start=110  interval=(110,237)  successor=Node 10 (index 131)
+    i=9  start=238  interval=(238,493)  successor=Node 2 (index 266)
+    i=10  start=494  interval=(494,1006)  successor=Node 8 (index 601)
+Data : [932]
+Node : Node 10	Index: 131	Neighbors: Node 3		
+    i=1  start=132  interval=(132,132)  successor=Node 3 (index 139)
+    i=2  start=133  interval=(133,134)  successor=Node 3 (index 139)
+    i=3  start=135  interval=(135,138)  successor=Node 3 (index 139)
+    i=4  start=139  interval=(139,146)  successor=Node 3 (index 139)
+    i=5  start=147  interval=(147,162)  successor=Node 2 (index 266)
+    i=6  start=163  interval=(163,194)  successor=Node 2 (index 266)
+    i=7  start=195  interval=(195,258)  successor=Node 2 (index 266)
+    i=8  start=259  interval=(259,386)  successor=Node 2 (index 266)
+    i=9  start=387  interval=(387,642)  successor=Node 7 (index 480)
+    i=10  start=643  interval=(643,131)  successor=Node 6 (index 666)
+Data : []
+......................................................
