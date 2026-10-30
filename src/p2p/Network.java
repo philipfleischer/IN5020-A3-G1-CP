@@ -2,17 +2,15 @@ package p2p;
 
 import java.util.*;
 
-
 /**
- * This network class simulates the topology in peer to peer network. The topology consists of set of nodes connected
- * with each other.
+ * A named set of peer nodes.
  */
 public class Network implements NetworkInterface{
 
-    // it indicates the name of the network
+    // name of the network
     public String networkName;
 
-    // it is the actual object that holds the network (set of peers)
+    // node name -> node, in insertion order
     public LinkedHashMap<String, NodeInterface> network;
 
     public Network(String name){
@@ -20,27 +18,23 @@ public class Network implements NetworkInterface{
         this.network = new LinkedHashMap<String, NodeInterface>();
     }
 
-
     public LinkedHashMap<String, NodeInterface> getTopology(){
         return this.network;
     }
-
 
     public NodeInterface getNode(String name){
         return this.network.get(name);
     }
 
-
     public void addNode(String name, NodeInterface node){
         this.network.put(name, node);
     }
-
 
     public void removeNode(String name){
         this.network.remove(name);
     }
 
-
+    // prints every node in the network
     public void printTopology(){
         System.out.println("..............Printing network topology..............");
         for(Map.Entry<String, NodeInterface> nodeEntry: this.network.entrySet()){
@@ -52,10 +46,11 @@ public class Network implements NetworkInterface{
 
 
     /**
-     * This method creates instance of the network class and returns it
-     * @param networkName - name of the network
-     * @param nodeCount - number of nodes in the network
-     * @return Network object - the network object
+     * Creates a network with nodes named "Node 1" .. "Node nodeCount".
+     *
+     * @param networkName name of the network
+     * @param nodeCount number of nodes in the network
+     * @return the network object
      */
     public static Network createNetwork(String networkName, int nodeCount){
         Network network = new Network(networkName);
@@ -67,10 +62,7 @@ public class Network implements NetworkInterface{
         return network;
     }
 
-
-
     public int getSize(){
         return this.network.size();
     }
-
 }

@@ -3,46 +3,38 @@ package p2p;
 import java.util.LinkedHashMap;
 
 public interface NetworkInterface {
-
-
-
     /**
-     *  returns the network object that consists of all the nodes
-     *
-     * @return set of nodes (node name, node object)
+     * @return all nodes, keyed by node name
      */
     LinkedHashMap<String, NodeInterface> getTopology();
 
     /**
-     * returns the node object which has the given name
-     * @param name name of the node object
+     * returns the node with the given name
+     * @param name name of the node
      * @return node object
      */
     NodeInterface getNode(String name);
 
     /**
-     * adds new node to the network object
-     * @param name name of the node object
+     * adds a new node to the network
+     * @param name name of the node
      * @param node the node object
      */
     void addNode(String name, NodeInterface node);
 
     /**
-     * removes a node from the network object
-     * @param name name of the node that needs to be removed
+     * removes a node from the network
+     * @param name name of the node to remove
      */
     void removeNode(String name);
 
     /**
-     * This method prints the network. For each node it prints the corresponding information stored in the node
+     * Prints every node in the network.
      */
     void printTopology();
 
     /**
-     * returns the number of nodes in the network
      * @return number of nodes
      */
     int getSize();
-
-
 }
