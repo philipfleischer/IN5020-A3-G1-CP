@@ -41,6 +41,21 @@ printf 'Main-Class: Simulator\n' > manifest.txt
 
 jar cfm ChordSimulator.jar manifest.txt -C bin .
 
+## System overview
+
+![One run of the simulator: Simulator.java starts ChordProtocolSimulator, which calls our ChordProtocol to build the ring and finger tables and to look up every key, and writes the results to output/](docs/diagrams/png/01_system_overview.png)
+
+The diagram (labels in Norwegian) shows one run. The numbers 1 to 7 are the order of the calls, and the green boxes are the code we wrote.
+
+- **Simulator.java** reads the node count and *m*, creates Node 1 … Node N, picks the number of keys and starts ChordProtocolSimulator.
+- **1 assignKeys()** hashes every "key i" and stores its index at the successor node.
+- **2 buildProtocol()** gives our protocol the network and calls **3 buildOverlayNetwork()** (part 1: index = ch.hash(name), TreeMap ring, one neighbor = successor) and **4 buildFingerTable()** (part 2: *m* rows per node with start, interval and successor).
+- **5 printNetworkToFile()** writes the ring and all finger tables to `output/network_N_m_.txt`.
+- **6 doLookUpAndGenerateOutputFiles()** calls **7 lookUp(keyIndex)** (part 3) for every key, which follows the finger tables from a fixed start node and returns a LookUpResponse. The response is checked, one line is written per key to `output/configuration_N_m_.txt`, and the average hop count is written last.
+- Underneath, **crypto.ConsistentHashing** gives hash(text) = MD5 mod 2^m, and **p2p.Network/Node** holds each node's name, id (index), neighbor (successor), routing table (FingerTable) and data (key indexes).
+
+The draw.io sources for this and the other explanation diagrams are in docs/diagrams/.
+
 ## How the three parts are implemented (src/protocol/ChordProtocol.java)
 
 1. **Overlay network, buildOverlayNetwork()**: each node gets its index from ch.hash(<node name>). The nodes are placed in a sorted map (TreeMap) that represents the ring, a hash collision stops the run with an error, and every node gets its successor (the next index, wrapping around to the lowest) as neighbor.
